@@ -51,9 +51,7 @@ void StepperMotor::SetSpeed (short stepsPerSecond)
 
 	// Angabe an Maximalgeschwindigkeit anpassen
 	if (realStepsPerSecond > _maxStepsPerSecond)
-	{
 		realStepsPerSecond = _maxStepsPerSecond;
-	}
 
 	// Die Größe der "virtuellen" Schritte bestimmen
 	_stepsPerTick = ((float)realStepsPerSecond * (float)_triggerInterval) / 1000000;
@@ -68,22 +66,29 @@ void StepperMotor::AccelerateToSpeed (short stepsPerSecond)
 	_wantedStepsPerSecond = stepsPerSecond;
 }
 
-void StepperMotor::UpdateSpeed ()
+short StepperMotor::UpdateSpeed ()
 {
 	// Geschwindigkeitsdifferenz bestimmen
 	short pendingDifference = abs (_wantedStepsPerSecond - _currentStepsPerSecond);
 
 	// Geschwindigkeitsifferenz evtl. begrenzen
 	if (pendingDifference > 200)
-	{
 		pendingDifference = 200;
-	}
 
 	// Vorzeichen bestimmen
 	short accelerationSign = (_wantedStepsPerSecond >= _currentStepsPerSecond ? 1 : -1);
 
 	// Geschwindigkeit um Differenz erhöhen
 	SetSpeed (_currentStepsPerSecond + (pendingDifference * accelerationSign));
+
+	// Aktuelle Geschwindigkeit zurückgeben
+	return _currentStepsPerSecond;
+}
+
+short StepperMotor::GetSpeed ()
+{
+	// Aktuelle Geschwindigkeit zurückgeben
+	return _currentStepsPerSecond;
 }
 
 bool StepperMotor::ProcessTick ()

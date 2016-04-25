@@ -16,9 +16,12 @@ StepperMotor _stepperRight (12, 11, 800, 5000, INTERRUPT_INTERVAL, false);
 // Zählt die Ticks des Timers seit dem letzten Geschwindigkeits-Update
 unsigned int _ticksSinceAccUpdate = 0;
 
-// Initialisiert das Programm.
+// Initialisiert das Programm
 void setup ()
 {
+	// Serielle Schnittstelle initialisieren
+	Serial.begin (115200);
+
 	// Schrittmotoren initialisieren
 	_stepperLeft.Initialize ();
 	_stepperRight.Initialize ();
@@ -26,20 +29,23 @@ void setup ()
 	// Timer initialisieren
 	Timer1.initialize ();
 	Timer1.attachInterrupt (tick, INTERRUPT_INTERVAL);
+
+	// Statusmeldung
+	Serial.println ("INIT");
 }
 
-// Handler der Hauptschleife.
+// Handler der Hauptschleife
 void loop ()
 {
-	_stepperLeft.AccelerateToSpeed (2500);
-	_stepperRight.AccelerateToSpeed (3000);
+	_stepperLeft.AccelerateToSpeed (1000);
+	_stepperRight.AccelerateToSpeed (1000);
 
-	delay (1500);
+	delay (2000);
 
 	_stepperLeft.AccelerateToSpeed (3000);
-	_stepperRight.AccelerateToSpeed (2500);
+	_stepperRight.AccelerateToSpeed (3000);
 
-	delay (1500);
+	delay (2000);
 }
 
 // Handler für einen Tick des Interrupt-Timers
@@ -48,9 +54,11 @@ void tick ()
 	// Geschwindigkeit alle 100ms aktualisieren
 	if (_ticksSinceAccUpdate++ >= 1000)
 	{
-		// Geschwindigkeiten aktualisieren
-		_stepperLeft.UpdateSpeed ();
-		_stepperRight.UpdateSpeed ();
+		// Geschwindigkeiten aktualisieren und protokollieren
+		Serial.print ("SPED,");
+		Serial.print (_stepperLeft.UpdateSpeed ());
+		Serial.print (",");
+		Serial.println (_stepperRight.UpdateSpeed ());
 
 		// Zähler zurücksetzen
 		_ticksSinceAccUpdate = 0;

@@ -52,7 +52,10 @@ public:
 	void AccelerateToSpeed (short stepsPerSecond);
 
 	// Wird regelmäßig ausgeführt und aktualisiert die Geschwindigkeit für eine lineare Beschleunigung.
-	void UpdateSpeed ();
+	short UpdateSpeed ();
+
+	// Gibt die aktuelle Geschwindigkeit zurück
+	short GetSpeed ();
 
 	// Wird bei jedem Interrupt-Tick ausgelöst und verarbeitet ausstehende Schritte.
 	bool ProcessTick ();
