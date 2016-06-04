@@ -37,15 +37,15 @@ void setup ()
 // Handler der Hauptschleife
 void loop ()
 {
-	_stepperLeft.AccelerateToSpeed (1000);
-	_stepperRight.AccelerateToSpeed (1000);
-
-	delay (2000);
-
-	_stepperLeft.AccelerateToSpeed (3000);
+	_stepperLeft.AccelerateToSpeed (0);
 	_stepperRight.AccelerateToSpeed (3000);
 
-	delay (2000);
+	delay (3000);
+
+	_stepperLeft.AccelerateToSpeed (3000);
+	_stepperRight.AccelerateToSpeed (0);
+
+	delay (3000);
 }
 
 // Handler für einen Tick des Interrupt-Timers

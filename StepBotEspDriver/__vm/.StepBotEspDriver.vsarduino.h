@@ -12,10 +12,11 @@
 #define _VSARDUINO_H_
 #define __ESP8266_ESp8266__
 #define __ESP8266_ESP8266__
+#define _VMDEBUG 1
 #define __ets__
 #define ICACHE_FLASH
 #define F_CPU 80000000L
-#define ARDUINO 10607
+#define ARDUINO 10609
 #define ARDUINO_ESP8266_ESP01
 #define ARDUINO_ARCH_ESP8266
 #define ESP8266
@@ -83,6 +84,7 @@ extern "C" void __cxa_pure_virtual() {;}
 
 
 #include <arduino.h>
+#include <common.h> 
 #include <pins_arduino.h> 
 #undef F
 #define F(string_literal) ((const PROGMEM char *)(string_literal))
@@ -100,5 +102,5 @@ extern "C" void __cxa_pure_virtual() {;}
 #define portOutputRegister(P)
 #define portInputRegister(P)
 #define portModeRegister(P)
-#include <..\StepBotEspDriver\StepBotEspDriver.ino>
+#include <StepBotEspDriver.ino>
 #endif

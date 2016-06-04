@@ -46,6 +46,10 @@ void loop ()
 
 		// Neue Verbindung annehmen
 		_controlClient = _controlServer.available ();
+
+		// Aufgestaute Daten der Seriellen Schnittstelle verwerfen
+		while (Serial.available ())
+			Serial.read ();
 	}
 
 	// Ist ein Client verbunden?

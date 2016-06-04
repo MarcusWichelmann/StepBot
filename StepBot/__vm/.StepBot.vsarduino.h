@@ -13,7 +13,7 @@
 #define __AVR_ATmega328p__
 #define __AVR_ATmega328P__
 #define F_CPU 16000000L
-#define ARDUINO 10607
+#define ARDUINO 10609
 #define ARDUINO_AVR_UNO
 #define ARDUINO_ARCH_AVR
 #define __cplusplus 201103L
@@ -63,7 +63,7 @@ extern "C" void __cxa_pure_virtual() {;}
 #define portOutputRegister(P)
 #define portInputRegister(P)
 #define portModeRegister(P)
-#include <..\StepBot\StepBot.ino>
-#include <..\StepBot\StepperMotor.cpp>
-#include <..\StepBot\StepperMotor.h>
+#include <StepBot.ino>
+#include <StepperMotor.cpp>
+#include <StepperMotor.h>
 #endif
