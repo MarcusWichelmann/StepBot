@@ -13,6 +13,8 @@ namespace StepBotViewer
 {
 	public partial class MainWindow : Form
 	{
+		private const double stepsPerRound = 800;
+
 		private enum LogType
 		{
 			STATUS,
@@ -22,6 +24,8 @@ namespace StepBotViewer
 		}
 
 		private StepBotClient client = new StepBotClient();
+
+		private Scene scene = null;
 
 		private delegate void ComputeCommandCallback(string command);
 		private delegate void UpdateConnectionStateCallback();
@@ -122,11 +126,13 @@ namespace StepBotViewer
 
 			speedLeftBar.Value = (int)Math.Abs(Math.Round(rpmLeft));
 			speedRightBar.Value = (int)Math.Abs(Math.Round(rpmRight));
+
+			scene?.ChangeSpeed(rpmLeft, rpmRight);
 		}
 
 		private double SpsToRpm(int stepsPerSecond)
 		{
-			return (((double)stepsPerSecond) / 800) * 60;
+			return stepsPerSecond / stepsPerRound * 60.0;
 		}
 
 		private async void connectButton_Click(object sender, EventArgs e)
@@ -136,10 +142,15 @@ namespace StepBotViewer
 				if(client.IsConnected)
 				{
 					client.Disconnect();
+
+					scene?.Stop();
 				}
 				else
 				{
 					debugLogTextBox.Clear();
+
+					scene = new Scene();
+					mapView.ChangeScene(scene);
 
 					await client.ConnectAsync(connectHostTextBox.Text, (int)connectPortNumericUpDown.Value);
 				}

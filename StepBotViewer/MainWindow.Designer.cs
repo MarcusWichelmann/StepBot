@@ -32,7 +32,6 @@
 			this.connectHostTextBox = new System.Windows.Forms.TextBox();
 			this.horizontalSplitContainer = new System.Windows.Forms.SplitContainer();
 			this.verticalSplitContainer = new System.Windows.Forms.SplitContainer();
-			this.mapView = new StepBotViewer.MapView();
 			this.robotStatusStrip = new System.Windows.Forms.StatusStrip();
 			this.speedLeftBar = new System.Windows.Forms.ToolStripProgressBar();
 			this.speedLeftLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -41,6 +40,7 @@
 			this.speedRightBar = new System.Windows.Forms.ToolStripProgressBar();
 			this.debugLogTextBox = new System.Windows.Forms.TextBox();
 			this.connectPortNumericUpDown = new System.Windows.Forms.NumericUpDown();
+			this.mapView = new StepBotViewer.MapView();
 			((System.ComponentModel.ISupportInitialize)(this.horizontalSplitContainer)).BeginInit();
 			this.horizontalSplitContainer.Panel1.SuspendLayout();
 			this.horizontalSplitContainer.Panel2.SuspendLayout();
@@ -55,7 +55,7 @@
 			// connectButton
 			// 
 			this.connectButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.connectButton.Location = new System.Drawing.Point(808, 12);
+			this.connectButton.Location = new System.Drawing.Point(812, 8);
 			this.connectButton.Name = "connectButton";
 			this.connectButton.Size = new System.Drawing.Size(75, 23);
 			this.connectButton.TabIndex = 0;
@@ -67,9 +67,9 @@
 			// 
 			this.connectHostTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.connectHostTextBox.Location = new System.Drawing.Point(12, 14);
+			this.connectHostTextBox.Location = new System.Drawing.Point(8, 10);
 			this.connectHostTextBox.Name = "connectHostTextBox";
-			this.connectHostTextBox.Size = new System.Drawing.Size(703, 20);
+			this.connectHostTextBox.Size = new System.Drawing.Size(711, 20);
 			this.connectHostTextBox.TabIndex = 1;
 			this.connectHostTextBox.Text = "192.168.50.1";
 			// 
@@ -106,15 +106,6 @@
 			this.verticalSplitContainer.Size = new System.Drawing.Size(895, 307);
 			this.verticalSplitContainer.SplitterDistance = 396;
 			this.verticalSplitContainer.TabIndex = 1;
-			// 
-			// mapView
-			// 
-			this.mapView.BackColor = System.Drawing.SystemColors.Window;
-			this.mapView.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.mapView.Location = new System.Drawing.Point(0, 0);
-			this.mapView.Name = "mapView";
-			this.mapView.Size = new System.Drawing.Size(396, 307);
-			this.mapView.TabIndex = 0;
 			// 
 			// robotStatusStrip
 			// 
@@ -180,7 +171,7 @@
 			// connectPortNumericUpDown
 			// 
 			this.connectPortNumericUpDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.connectPortNumericUpDown.Location = new System.Drawing.Point(721, 14);
+			this.connectPortNumericUpDown.Location = new System.Drawing.Point(725, 10);
 			this.connectPortNumericUpDown.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -194,6 +185,15 @@
             0,
             0,
             0});
+			// 
+			// mapView
+			// 
+			this.mapView.BackColor = System.Drawing.SystemColors.Window;
+			this.mapView.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.mapView.Location = new System.Drawing.Point(0, 0);
+			this.mapView.Name = "mapView";
+			this.mapView.Size = new System.Drawing.Size(396, 307);
+			this.mapView.TabIndex = 0;
 			// 
 			// MainWindow
 			// 
