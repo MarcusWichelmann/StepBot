@@ -11,160 +11,252 @@ using System.Windows.Forms;
 
 namespace StepBotViewer
 {
-	public partial class MainWindow : Form
-	{
-		private const double stepsPerRound = 800;
+    public partial class MainWindow : Form
+    {
+        private const double stepsPerRound = 800;
 
-		private enum LogType
-		{
-			STATUS,
-			SENT,
-			RECEIVED,
-			ERROR
-		}
+        private enum LogType
+        {
+            STATUS,
+            SENT,
+            RECEIVED,
+            ERROR
+        }
 
-		private StepBotClient client = new StepBotClient();
+        private StepBotClient client = new StepBotClient();
 
-		private Scene scene = null;
+        private Scene scene = null;
 
-		private delegate void ComputeCommandCallback(string command);
-		private delegate void UpdateConnectionStateCallback();
+        private bool keyUpPressed, keyDownPressed, keyLeftPressed, keyRightPressed;
 
-		public MainWindow()
-		{
-			InitializeComponent();
+        private int keyControlSpeed = 2000;
 
-			client.CommandReceived += client_CommandReceived;
-			client.ConnectionStateChanged += client_ConnectionStateChanged;
-		}
+        private int lastSpeedLeft = 0;
+        private int lastSpeedRight = 0;
 
-		private void WriteLog(LogType logType, string message)
-		{
-			string prefix = "";
+        private delegate void ComputeCommandCallback(string command);
+        private delegate void UpdateConnectionStateCallback();
 
-			switch(logType)
-			{
-				case LogType.STATUS:
-					prefix = "Status: ";
-					break;
-				case LogType.SENT:
-					prefix = "Gesendet: ";
-					break;
-				case LogType.RECEIVED:
-					prefix = "Empfangen: ";
-					break;
-				case LogType.ERROR:
-					prefix = "Fehler: ";
-					break;
-			}
+        public MainWindow()
+        {
+            InitializeComponent();
 
-			debugLogTextBox.AppendText(prefix + message + Environment.NewLine);
-		}
+            client.CommandReceived += client_CommandReceived;
+            client.ConnectionStateChanged += client_ConnectionStateChanged;
+        }
 
-		private void UpdateConnectionState()
-		{
-			if(InvokeRequired)
-			{
-				Invoke(new UpdateConnectionStateCallback(UpdateConnectionState), null);
-				return;
-			}
+        private void WriteLog(LogType logType, string message)
+        {
+            string prefix = "";
 
-			bool isConnected = client.IsConnected;
+            switch(logType)
+            {
+                case LogType.STATUS:
+                    prefix = "Status: ";
+                    break;
+                case LogType.SENT:
+                    prefix = "Gesendet: ";
+                    break;
+                case LogType.RECEIVED:
+                    prefix = "Empfangen: ";
+                    break;
+                case LogType.ERROR:
+                    prefix = "Fehler: ";
+                    break;
+            }
 
-			connectHostTextBox.Enabled = !isConnected;
-			connectPortNumericUpDown.Enabled = !isConnected;
-			connectButton.Text = (isConnected ? "Trennen" : "Verbinden");
+            debugLogTextBox.AppendText(prefix + message + Environment.NewLine);
+        }
 
-			WriteLog(LogType.STATUS, isConnected ? "Verbindung hergestellt." : "Verbindung beendet.");
-		}
+        private void UpdateConnectionState()
+        {
+            if(InvokeRequired)
+            {
+                Invoke(new UpdateConnectionStateCallback(UpdateConnectionState), null);
+                return;
+            }
 
-		private void client_CommandReceived(CommandReceivedEventArgs e)
-		{
-			ComputeCommand(e.Command);
-		}
+            bool isConnected = client.IsConnected;
 
-		private void client_ConnectionStateChanged(EventArgs e)
-		{
-			UpdateConnectionState();
-		}
+            connectHostTextBox.Enabled = !isConnected;
+            connectPortNumericUpDown.Enabled = !isConnected;
+            connectButton.Text = (isConnected ? "Trennen" : "Verbinden");
 
-		private void ComputeCommand(string command)
-		{
-			if(InvokeRequired && !IsDisposed)
-			{
-				Invoke(new ComputeCommandCallback(ComputeCommand), new object[] { command });
-				return;
-			}
+            WriteLog(LogType.STATUS, isConnected ? "Verbindung hergestellt." : "Verbindung beendet.");
+        }
 
-			WriteLog(LogType.RECEIVED, command);
+        private void client_CommandReceived(CommandReceivedEventArgs e)
+        {
+            ComputeCommand(e.Command);
+        }
 
-			try
-			{
-				string[] args = command.Split(',');
+        private void client_ConnectionStateChanged(EventArgs e)
+        {
+            UpdateConnectionState();
+        }
 
-				switch(args[0])
-				{
-					case "SPED":
-						ProcessSpeedUpdate(int.Parse(args[1]), int.Parse(args[2]));
+        private void ComputeCommand(string command)
+        {
+            if(InvokeRequired && !IsDisposed)
+            {
+                Invoke(new ComputeCommandCallback(ComputeCommand), new object[] { command });
+                return;
+            }
 
-						break;
-				}
-			}
-			catch(Exception ex)
-			{
-				WriteLog(LogType.ERROR, ex.Message);
-			}
-		}
+            WriteLog(LogType.RECEIVED, command);
 
-		private void ProcessSpeedUpdate(int speedLeft, int speedRight)
-		{
-			double rpmLeft = SpsToRpm(speedLeft);
-			double rpmRight = SpsToRpm(speedRight);
+            try
+            {
+                string[] args = command.Split(',');
 
-			speedLeftLabel.Text = string.Format("{0:0.00} rpm", rpmLeft);
-			speedRightLabel.Text = string.Format("{0:0.00} rpm", rpmRight);
+                switch(args[0])
+                {
+                    case "SPED":
+                        ProcessSpeedUpdate(int.Parse(args[1]), int.Parse(args[2]));
 
-			speedLeftBar.Value = (int)Math.Abs(Math.Round(rpmLeft));
-			speedRightBar.Value = (int)Math.Abs(Math.Round(rpmRight));
+                        break;
+                }
+            }
+            catch(Exception ex)
+            {
+                WriteLog(LogType.ERROR, ex.Message);
+            }
+        }
 
-			scene?.ChangeSpeed(rpmLeft, rpmRight);
-		}
+        private void ProcessSpeedUpdate(int speedLeft, int speedRight)
+        {
+            double rpmLeft = SpsToRpm(speedLeft);
+            double rpmRight = SpsToRpm(speedRight);
 
-		private double SpsToRpm(int stepsPerSecond)
-		{
-			return stepsPerSecond / stepsPerRound * 60.0;
-		}
+            speedLeftLabel.Text = string.Format("{0:0.00} rpm", rpmLeft);
+            speedRightLabel.Text = string.Format("{0:0.00} rpm", rpmRight);
 
-		private async void connectButton_Click(object sender, EventArgs e)
-		{
-			try
-			{
-				if(client.IsConnected)
-				{
-					client.Disconnect();
+            speedLeftBar.Value = (int)Math.Abs(Math.Round(rpmLeft));
+            speedRightBar.Value = (int)Math.Abs(Math.Round(rpmRight));
 
-					scene?.Stop();
-				}
-				else
-				{
-					debugLogTextBox.Clear();
+            scene?.ChangeSpeed(rpmLeft, rpmRight);
+        }
 
-					scene = new Scene();
-					mapView.ChangeScene(scene);
+        private double SpsToRpm(int stepsPerSecond)
+        {
+            return stepsPerSecond / stepsPerRound * 60.0;
+        }
 
-					await client.ConnectAsync(connectHostTextBox.Text, (int)connectPortNumericUpDown.Value);
-				}
-			}
-			catch(Exception ex)
-			{
-				WriteLog(LogType.ERROR, ex.Message);
-			}
-		}
+        private async Task ProcessKeyControl()
+        {
+            if(!client.IsConnected)
+                return;
 
-		private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
-		{
-			if(client.IsConnected)
-				client.Disconnect();
-		}
-	}
+            int speedLeft = 0;
+            int speedRight = 0;
+
+            if(keyUpPressed)
+                speedLeft = (speedRight = keyControlSpeed);
+            else if(keyDownPressed)
+                speedLeft = (speedRight = -keyControlSpeed);
+            else if(keyLeftPressed)
+                speedLeft = -(speedRight = keyControlSpeed);
+            else if(keyRightPressed)
+                speedLeft = -(speedRight = -keyControlSpeed);
+
+            if((keyUpPressed || keyDownPressed) && keyLeftPressed)
+                speedLeft = 0;
+
+            if((keyUpPressed || keyDownPressed) && keyRightPressed)
+                speedRight = 0;
+
+            if(speedLeft != lastSpeedLeft || speedRight != lastSpeedRight)
+            {
+                lastSpeedLeft = speedLeft;
+                lastSpeedRight = speedRight;
+
+                string command = string.Format("SACC,{0},{1}", speedRight, speedLeft);
+                await client.SendAsync(command);
+
+                WriteLog(LogType.SENT, command);
+            }
+        }
+
+        private async void connectButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if(client.IsConnected)
+                {
+                    client.Disconnect();
+
+                    scene?.Stop();
+                }
+                else
+                {
+                    debugLogTextBox.Clear();
+
+                    scene = new Scene();
+                    mapView.ChangeScene(scene);
+
+                    await client.ConnectAsync(connectHostTextBox.Text, (int)connectPortNumericUpDown.Value);
+                }
+            }
+            catch(Exception ex)
+            {
+                WriteLog(LogType.ERROR, ex.Message);
+            }
+        }
+
+        private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if(client.IsConnected)
+                client.Disconnect();
+        }
+
+        private async void MainWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch(e.KeyCode)
+            {
+                case Keys.Up:
+                    keyUpPressed = true;
+                    break;
+                case Keys.Down:
+                    keyDownPressed = true;
+                    break;
+                case Keys.Left:
+                    keyLeftPressed = true;
+                    break;
+                case Keys.Right:
+                    keyRightPressed = true;
+                    break;
+                default:
+                    return;
+            }
+
+            await ProcessKeyControl();
+
+            e.Handled = true;
+        }
+
+        private async void MainWindow_KeyUp(object sender, KeyEventArgs e)
+        {
+            switch(e.KeyCode)
+            {
+                case Keys.Up:
+                    keyUpPressed = false;
+                    break;
+                case Keys.Down:
+                    keyDownPressed = false;
+                    break;
+                case Keys.Left:
+                    keyLeftPressed = false;
+                    break;
+                case Keys.Right:
+                    keyRightPressed = false;
+                    break;
+                default:
+                    return;
+            }
+
+            await ProcessKeyControl();
+
+            e.Handled = true;
+        }
+    }
 }

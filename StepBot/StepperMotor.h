@@ -43,7 +43,7 @@ private:
 
 public:
 	// Konstruktor.
-	StepperMotor (unsigned char directionPin, unsigned char stepperPin, unsigned short stepsPerRound, unsigned short minStepTime, unsigned short triggerInterval, bool inverted);
+	StepperMotor (unsigned char directionPin, unsigned char stepperPin, unsigned short stepsPerRound, unsigned short maxStepsPerSecond, unsigned short triggerInterval, bool inverted);
 
 	// Initialisiert den Motor.
 	void Initialize ();

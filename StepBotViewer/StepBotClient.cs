@@ -10,96 +10,103 @@ using System.Threading.Tasks;
 
 namespace StepBotViewer
 {
-	public class StepBotClient
-	{
-		public bool IsConnected
-		{
-			get
-			{
-				return tcpClient != null && tcpClient.Connected;
-			}
-		}
+    public class StepBotClient
+    {
+        public bool IsConnected
+        {
+            get
+            {
+                return tcpClient != null && tcpClient.Connected;
+            }
+        }
 
-		public event CommandReceivedEventHandler CommandReceived;
-		public event ConnectionStateChangedEventHandler ConnectionStateChanged;
+        public event CommandReceivedEventHandler CommandReceived;
+        public event ConnectionStateChangedEventHandler ConnectionStateChanged;
 
-		public delegate void CommandReceivedEventHandler(CommandReceivedEventArgs e);
-		public delegate void ConnectionStateChangedEventHandler(EventArgs e);
+        public delegate void CommandReceivedEventHandler(CommandReceivedEventArgs e);
+        public delegate void ConnectionStateChangedEventHandler(EventArgs e);
 
-		private TcpClient tcpClient;
-		private NetworkStream stream;
+        private TcpClient tcpClient;
+        private NetworkStream stream;
 
-		private Thread receiveThread;
+        private Thread receiveThread;
 
-		private string pendingCommand;
+        private string pendingCommand;
 
-		private bool closeConnection = false;
+        private bool closeConnection = false;
 
-		public async Task ConnectAsync(string host, int port)
-		{
-			tcpClient = new TcpClient();
+        public async Task ConnectAsync(string host, int port)
+        {
+            tcpClient = new TcpClient();
 
-			await tcpClient.ConnectAsync(host, port);
+            await tcpClient.ConnectAsync(host, port);
 
-			if(!tcpClient.Connected)
-				return;
+            if(!tcpClient.Connected)
+                return;
 
-			closeConnection = false;
+            closeConnection = false;
 
-			stream = tcpClient.GetStream();
+            stream = tcpClient.GetStream();
 
-			receiveThread = new Thread(Receive);
-			receiveThread.Start();
+            receiveThread = new Thread(Receive);
+            receiveThread.Start();
 
-			ConnectionStateChanged?.Invoke(new EventArgs());
-		}
+            ConnectionStateChanged?.Invoke(new EventArgs());
+        }
 
-		public void Disconnect()
-		{
-			closeConnection = true;
-			tcpClient.Close();
+        public void Disconnect()
+        {
+            closeConnection = true;
+            tcpClient.Close();
 
-			ConnectionStateChanged?.Invoke(new EventArgs());
-		}
+            ConnectionStateChanged?.Invoke(new EventArgs());
+        }
 
-		private void Receive()
-		{
-			while(!closeConnection)
-			{
-				try
-				{
-					int b;
-					while((b = stream.ReadByte()) != -1 && !closeConnection)
-					{
-						char c = (char)b;
+        public async Task SendAsync(string command)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(command + Environment.NewLine);
 
-						if(c == '\n')
-						{
-							CommandReceived?.Invoke(new CommandReceivedEventArgs(pendingCommand.TrimEnd('\r')));
-							pendingCommand = string.Empty;
-						}
-						else
-						{
-							pendingCommand += c;
-						}
-					}
-				}
-				catch
-				{
-					if(!closeConnection)
-						throw;
-				}
-			}
-		}
-	}
+            await stream.WriteAsync(data, 0, data.Length);
+        }
 
-	public class CommandReceivedEventArgs
-	{
-		public string Command { get; private set; }
+        private void Receive()
+        {
+            while(!closeConnection)
+            {
+                try
+                {
+                    int b;
+                    while((b = stream.ReadByte()) != -1 && !closeConnection)
+                    {
+                        char c = (char)b;
 
-		public CommandReceivedEventArgs(string command)
-		{
-			Command = command;
-		}
-	}
+                        if(c == '\n')
+                        {
+                            CommandReceived?.Invoke(new CommandReceivedEventArgs(pendingCommand.TrimEnd('\r')));
+                            pendingCommand = string.Empty;
+                        }
+                        else
+                        {
+                            pendingCommand += c;
+                        }
+                    }
+                }
+                catch
+                {
+                    if(!closeConnection)
+                        throw;
+                }
+            }
+        }
+    }
+
+    public class CommandReceivedEventArgs
+    {
+        public string Command { get; private set; }
+
+        public CommandReceivedEventArgs(string command)
+        {
+            Command = command;
+        }
+    }
 }

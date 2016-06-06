@@ -16,6 +16,14 @@ StepperMotor _stepperRight (12, 11, 800, 5000, INTERRUPT_INTERVAL, false);
 // Zählt die Ticks des Timers seit dem letzten Geschwindigkeits-Update
 unsigned int _ticksSinceAccUpdate = 0;
 
+// Gibt an, welcher Teil des Befehles gerade empfangen wird
+int commandPart = 0;
+
+// Zwischenspeicher für eingehende Befehle
+String command = "";
+String arg0 = "";
+String arg1 = "";
+
 // Initialisiert das Programm
 void setup ()
 {
@@ -37,15 +45,58 @@ void setup ()
 // Handler der Hauptschleife
 void loop ()
 {
-	_stepperLeft.AccelerateToSpeed (0);
-	_stepperRight.AccelerateToSpeed (3000);
+	// Nichts tun.
+}
 
-	delay (3000);
+// Handler für eingehende Daten an der Seriellen Schnittstelle
+void serialEvent ()
+{
+	// Lesen, solange Daten vorhanden sind
+	while (Serial.available ())
+	{
+		// Nächstes Zeichen aus dem Stream lesen
+		char c = (char)Serial.read ();
 
-	_stepperLeft.AccelerateToSpeed (3000);
-	_stepperRight.AccelerateToSpeed (0);
+		// Zeilenende?
+		if (c == '\n')
+		{
+			// Befehl verarbeiten
+			computeCommand ();
 
-	delay (3000);
+			// Neuer Befehl beginnt
+			commandPart = 0;
+			command = "";
+			arg0 = "";
+			arg1 = "";
+
+		}
+		else if (c == ',')
+		{
+			// Nächster Teil wird eingeleitet
+			commandPart++;
+		}
+		else if (c != '\r')
+		{
+			// Zeichen zwischenspeichern
+			switch (commandPart)
+			{
+				case 0: command += c; break;
+				case 1: arg0 += c; break;
+				case 2: arg1 += c; break;
+			}
+		}
+	}
+}
+
+void computeCommand ()
+{
+	// Befehl untersuchen
+	if (command == "SACC")
+	{
+		// Geschwindigkeit beschleunigt ändern
+		_stepperLeft.AccelerateToSpeed (arg0.toInt ());
+		_stepperRight.AccelerateToSpeed (arg1.toInt ());
+	}
 }
 
 // Handler für einen Tick des Interrupt-Timers
